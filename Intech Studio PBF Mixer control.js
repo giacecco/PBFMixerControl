@@ -1,7 +1,5 @@
 const VENDOR = "Intech Studio";
-const EXTENSION_NAME = "PBF4 for mixing";
-const EXTENSION_UUID = "7f439224-2e01-42bc-a935-63f923c77802";
-const VERSION = "0.3";
+const VERSION = "0.5";
 
 loadAPI(18);
 
@@ -49,7 +47,7 @@ TrackHandler.prototype.handleMidi = function (status, cc, value) {
       return (getModulePositionFromCc(cc) - knownLeftmostPosition) * 4 + cc % 4;
    }
       
-   if (isChannelController(status)) {
+   // if (isChannelController(status)) {
       var bankPosition = getBankPositionFromCc(cc);
       switch (cc % 16) {
          case 0:
@@ -71,9 +69,10 @@ TrackHandler.prototype.handleMidi = function (status, cc, value) {
          case 10:
          case 11:
             // mute buttons
+            this.trackbank.getItemAt(bankPosition).mute().set(value == 127);
             return true;
         }
-   }
+   // }
    return false;
 }
 
