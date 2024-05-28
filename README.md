@@ -2,7 +2,7 @@
  A Bitwig Studio script to automatically map one or more Intech Studio PBF4 modules to Bitwig's mixer.
 
 ## How to use
-Have any number of PBF4 running a conventional Intech Studio configuration. Use one that does not fiddle with the way the modules' elements are associated to different CC numbers. One of my favorite is [one I made myself](grid-editor://?config-link=2lirJPfo9EU6RAzXCSsM). Then:
+Have any number of PBF4 running a conventional Intech Studio configuration. Use one that does not fiddle with the way the modules' elements are associated to different CC numbers. One of my favorite is "Toggle buttons on release and progressive faders", that I made myself and you can find in the Profile Cloud. Then:
 
 1. Copy all the `.js` files in your Bitwig's `Controller Scripts` folder (on macOS, in `~/Bitwig Studio`)
 2. connect any number of PBF4 modules in a straight horizontal line, and the USB cable to one of them
