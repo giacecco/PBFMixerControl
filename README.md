@@ -6,7 +6,7 @@ Have any number of PBF4 running a conventional Intech Studio configuration. Use 
 
 1. Copy all the `.js` files in your Bitwig's `Controller Scripts` folder (on macOS, in `~/Bitwig Studio`)
 2. Connect any number of PBF4 modules in a straight horizontal line, and the USB cable to one of them
-3. Start Bitwig and add the controller normally in the Dashboard in Controllers, choosing Intech Studio in the Hardware Vendor drop down list, and the appropriate "Product" depending on the number of PBF4 modules you are using, e.g. `3xPBF4 for mixing`
+3. Start Bitwig and add the controller normally in the Dashboard in Controllers, choosing `Intech Studio` in the `Hardware Vendor` drop down list, and the appropriate `Product` depending on the number of PBF4 modules you are using, e.g. `3xPBF4 for mixing`
 4. "Touch" any component of the leftmost module. That will let the script detect how the modules are connected together. If you don't do this, the script will not be able to know of any modules connected to the left to the module where the USB cable is connected.
 
 ... and you are done. The knobs, faders and buttons will control respectively pan, volume and mutes of the top level tracks in your project, starting from the leftmost track.
