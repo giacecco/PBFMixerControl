@@ -11,7 +11,13 @@ host.defineMidiPorts(1, 0);
 
 var hardware = null;
 var trackHandler = null;
-var knownLeftmostPosition = undefined;
+var knownLeftmostPosition = null;
+var knownRightmostPosition = null;
+
+// detect a Grid module's position from any of its CC being used (assuming they are in a horizontal line)
+function getModulePositionFromCc(cc) {
+   return ((cc - cc % 16) - 32) / 16;
+}
 
 function PBF4Hardware(inputPort, inputCallback) {
     this.portIn  = inputPort;
@@ -38,38 +44,67 @@ function TrackHandler (trackbank, cursorTrack)
 
 TrackHandler.prototype.handleMidi = function (status, cc, value) {
 
-   // this will have to change a lot to support multiple Intech Studio modules
-   function getBankPositionFromCc (cc) {
-      return (cc - 32) % 4;
+   // given the leftmost Grid module known, calculates the track number corresponding to the elements just used
+   function getBankPositionFromCc(cc) {
+      return (getModulePositionFromCc(cc) - knownLeftmostPosition) * 4 + cc % 4;
    }
-
-   host.println(status + " " + cc + " " + value);
+      
    if (isChannelController(status)) {
       var bankPosition = getBankPositionFromCc(cc);
-      if((cc >= 32) && (cc <= 35)) {
-         // pan knobs
-         this.trackbank.getItemAt(bankPosition).pan().set(value, 128);
-         return true;
-      } else if ((cc >= 36) && (cc <= 39)) {
-         // volume faders
-         this.trackbank.getItemAt(bankPosition).volume().set(value, 128);
-         return true;
-      }
+      switch (cc % 16) {
+         case 0:
+         case 1:
+         case 2:
+         case 3:
+            // pan knobs
+            this.trackbank.getItemAt(bankPosition).pan().set(value, 128);
+            return true;
+         case 4:
+         case 5:
+         case 6:
+         case 7:
+            // volume faders
+            this.trackbank.getItemAt(bankPosition).volume().set(value, 128);
+            return true;
+         case 8:
+         case 9:
+         case 10:
+         case 11:
+            // mute buttons
+            return true;
+        }
    }
    return false;
 }
 
 function init() {
-
+   var bankSize = (NO_OF_PBFS ? NO_OF_PBFS : 1) * 4;
    hardware = new PBF4Hardware(host.getMidiInPort(0), handleMidi);
-   trackHandler = new TrackHandler (host.createMainTrackBank (4, 0, 0), host.createCursorTrack ("MOXF_CURSOR_TRACK", "Cursor Track", 0, 0, true));
+   trackHandler = new TrackHandler(host.createMainTrackBank (bankSize, 0, 0), host.createCursorTrack ("MOXF_CURSOR_TRACK", "Cursor Track", 0, 0, true));
    host.println(VENDOR + " " + EXTENSION_NAME + " " + VERSION + " initialized!");
-
 }
 
-function handleMidi(status, data1, data2) {
-   if (trackHandler.handleMidi (status, data1, data2)) return;
-   host.errorln ("MIDI command not processed: " + status + " : " + data1);
+function handleMidi(status, cc, value) {
+
+   // tries to detect the leftmost known Grid module as the modules are used
+   function checkForKnownLeftmostPosition(cc) {
+      var position = getModulePositionFromCc(cc);
+      var changed = false;
+      knownLeftmostPosition = (!knownLeftmostPosition || position < knownLeftmostPosition) ? position : knownLeftmostPosition;
+      if (!knownLeftmostPosition || position < knownLeftmostPosition) {
+         knownLeftmostPosition = position; changed = true;
+      } 
+      if (!knownRightmostPosition || position > knownRightmostPosition) {
+         knownRightmostPosition = position; changed = true;
+      }
+      // if (changed) init(knownRightmostPosition - knownLeftmostPosition + 1);
+   }
+
+   // this needs to be run for each MIDI message received, just in case a new leftmost module is revealed
+   checkForKnownLeftmostPosition(cc);
+   
+   if (trackHandler.handleMidi (status, cc, value)) return;
+   host.errorln ("MIDI command not processed: " + status + " : " + cc);
 }
 
 function flush() {
