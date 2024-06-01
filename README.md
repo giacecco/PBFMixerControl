@@ -20,7 +20,6 @@ Then:
 - Associate to the rightmost fader the master channel fader (I understand it is common practice).
 - Decide a clever way to manage groups or instrument layers in the mixer.
 - Automatically support an equal number of PO16s above the faders, to mimic the layout of a classic MIDI console. The knobs could be associated to the sends.
-- Bitwig's "Relative Scaling" option of takeover mode... but it was invented already :-)
 
 ## Troubleshooting
 - If one of the PBF4 seems not to be recognized, check if Intech Studio's own Grid Editor can see it.

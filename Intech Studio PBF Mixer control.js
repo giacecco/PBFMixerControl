@@ -1,5 +1,5 @@
 const VENDOR = "Intech Studio";
-const VERSION = "0.5";
+const VERSION = "0.6";
 
 loadAPI(18);
 
@@ -48,10 +48,14 @@ TrackHandler.prototype.handleMidi = function (status, cc, value) {
    }
 
    // status seems to be the MIDI status byte according to the official specifications 
-   // https://midi.org/expanded-midi-1-0-messages-list ; 176 is "Chan 1 Control/Mode Change".
-   // note that, in the specifications, channels are numbered starting from 1, not 0.
-   if (status == 176) {
+   // https://midi.org/expanded-midi-1-0-messages-list ; what I need here is to do something
+   // only if the signal comes from the first row of Grid modules, that is MIDI channel 1
+   // (in MIDI status bytes, the channel number is in the rightmost 3).
+   // Note that, in the specifications, channels are numbered starting from 1, not 0.
+   // There must be a more elegant way for doing this.
+   if (status.toString(2).slice(-3) == '000') {
       var bankPosition = getBankPositionFromCc(cc);
+      host.errorln ("bankPosition: " + bankPosition);
       switch (cc % 16) {
          case 0:
          case 1:
@@ -80,7 +84,7 @@ TrackHandler.prototype.handleMidi = function (status, cc, value) {
 }
 
 function init() {
-   var bankSize = (NO_OF_PBFS ? NO_OF_PBFS : 1) * 4;
+   var bankSize = NO_OF_PBFS * 4;
    hardware = new PBF4Hardware(host.getMidiInPort(0), handleMidi);
    trackHandler = new TrackHandler(host.createMainTrackBank (bankSize, 0, 0), host.createCursorTrack ("MOXF_CURSOR_TRACK", "Cursor Track", 0, 0, true));
    host.println(VENDOR + " " + EXTENSION_NAME + " " + VERSION + " initialized!");
