@@ -46,8 +46,11 @@ TrackHandler.prototype.handleMidi = function (status, cc, value) {
    function getBankPositionFromCc(cc) {
       return (getModulePositionFromCc(cc) - knownLeftmostPosition) * 4 + cc % 4;
    }
-      
-   // if (isChannelController(status)) {
+
+   // status seems to be the MIDI status byte according to the official specifications 
+   // https://midi.org/expanded-midi-1-0-messages-list ; 176 is "Chan 1 Control/Mode Change".
+   // note that, in the specifications, channels are numbered starting from 1, not 0.
+   if (status == 176) {
       var bankPosition = getBankPositionFromCc(cc);
       switch (cc % 16) {
          case 0:
@@ -72,7 +75,7 @@ TrackHandler.prototype.handleMidi = function (status, cc, value) {
             this.trackbank.getItemAt(bankPosition).mute().set(value == 127);
             return true;
         }
-   // }
+   }
    return false;
 }
 
